@@ -1,13 +1,22 @@
 using UnityEngine;
 using System.Collections;
 
+[RequireComponent(typeof(AudioSource))]
+
 public class Alarm : MonoBehaviour
 {
-    [SerializeField] private AudioSource _alarm;
+    [SerializeField] private AudioSource _sound;
 
-    private float _volumeModifier = 0.1f;
+    private float _volumeModifier;
     private Coroutine _increase;
     private Coroutine _decrease;
+    private WaitForSeconds _volumeChangeDelay;
+
+    private void Awake()
+    {
+        _volumeModifier = 0.05f;
+        _volumeChangeDelay = new WaitForSeconds(0.2f);
+    }
 
     private void OnTriggerEnter(Collider other)
     {
@@ -18,7 +27,7 @@ public class Alarm : MonoBehaviour
 
         if (other.TryGetComponent<Player>(out Player player))
         {
-            _alarm.Play();
+            _sound.Play();
             _increase = StartCoroutine(VolumeIncrease());
         }
     }
@@ -28,27 +37,27 @@ public class Alarm : MonoBehaviour
         StopCoroutine(_increase);
         _decrease = StartCoroutine(VolumeDecrease());
 
-        if (_alarm.volume == 0)
+        if (_sound.volume == 0)
         {
-            _alarm.Stop();
+            _sound.Stop();
         }
     }
 
     private IEnumerator VolumeIncrease()
     {
-        while (_alarm.volume < 1)
+        while (_sound.volume < 1)
         {
-            yield return new WaitForSeconds(0.5f);
-            _alarm.volume += _volumeModifier;
+            yield return _volumeChangeDelay;
+            _sound.volume += _volumeModifier;
         }
     }
 
     private IEnumerator VolumeDecrease()
     {
-        while (_alarm.volume > 0)
+        while (_sound.volume > 0)
         {
-            yield return new WaitForSeconds(0.5f);
-            _alarm.volume -= _volumeModifier;
+            yield return _volumeChangeDelay;
+            _sound.volume -= _volumeModifier;
         }
     } 
 }
