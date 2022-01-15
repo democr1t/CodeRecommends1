@@ -7,14 +7,19 @@ public class Alarm : MonoBehaviour
 {
     [SerializeField] private AudioSource _sound;
 
+    private float _maxVolume;
+    private float _minVolume;
     private float _volumeModifier;
+    private WaitForSeconds _volumeChangeDelay;
     private Coroutine _increase;
     private Coroutine _decrease;
-    private WaitForSeconds _volumeChangeDelay;
+    
 
     private void Awake()
     {
         _volumeModifier = 0.05f;
+        _maxVolume = 1.0f;
+        _minVolume = 1.0f;
         _volumeChangeDelay = new WaitForSeconds(0.2f);
     }
 
@@ -37,7 +42,7 @@ public class Alarm : MonoBehaviour
         StopCoroutine(_increase);
         _decrease = StartCoroutine(VolumeDecrease());
 
-        if (_sound.volume == 0)
+        if (_sound.volume == _minVolume)
         {
             _sound.Stop();
         }
@@ -45,7 +50,7 @@ public class Alarm : MonoBehaviour
 
     private IEnumerator VolumeIncrease()
     {
-        while (_sound.volume < 1)
+        while (_sound.volume < _maxVolume)
         {
             yield return _volumeChangeDelay;
             _sound.volume += _volumeModifier;
@@ -54,7 +59,7 @@ public class Alarm : MonoBehaviour
 
     private IEnumerator VolumeDecrease()
     {
-        while (_sound.volume > 0)
+        while (_sound.volume > _minVolume)
         {
             yield return _volumeChangeDelay;
             _sound.volume -= _volumeModifier;
